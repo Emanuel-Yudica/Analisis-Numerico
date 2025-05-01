@@ -1,5 +1,5 @@
 
-# Análisis Numérico - Evaluación de funciones simbólicas
+# Análisis Numérico - Propagación del error en la evaluación de funciones
 ## Emanuel Yudica y Franco Zapata
 Este proyecto permite ingresar una función con variables `x`, `y`, `z`, calcular su valor en un punto y estimar el error por derivadas parciales usando `SymPy`.
 
