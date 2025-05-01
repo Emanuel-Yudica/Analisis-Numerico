@@ -16,14 +16,14 @@ Este proyecto permite ingresar una función con variables `x`, `y`, `z`, calcula
 ## ⚙️ Instalación
 
 ### 🔵 En Windows
-python -m pip install
+` python -m pip install
 python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
-python main.py
+python main.py `
 
 ## En Linux o MacOS
-python3 -m venv venv
+` python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-python main.py
+python main.py `
