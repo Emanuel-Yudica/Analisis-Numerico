@@ -1,3 +1,5 @@
+
+
 import sympy as sp
 
 def main(f_str):
@@ -5,6 +7,7 @@ def main(f_str):
     x, y, z = sp.symbols('x y z')
     vx = vy = vz = cx = cy = cz = 0 
     # Convertir el string de la funcion a expresion simbolica
+    
     f = sp.sympify(f_str)
     existe_x = False
     existe_y = False
@@ -98,5 +101,10 @@ if __name__ == '__main__':
     print("")
     print("Funcion de ejemplo: 2*x**2+2*y**2+2*z**2") 
     print("Sintaxis de operaciones: https://chatgpt.com/share/6813974c-3fac-800e-9ca9-fb1f0d1e85b0")
-    f = input("Inserte su funcion (usar x, y, z):\n> ")
-    main(f)
+    while True:
+        try:
+            f = input("Inserte su funcion (usar x, y, z):\n> ")
+            main(f)
+            break
+        except :
+            print("Error: La expresión ingresada no es válida.")
