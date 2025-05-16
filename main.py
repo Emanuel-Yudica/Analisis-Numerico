@@ -1,110 +1,102 @@
-
-
 import sympy as sp
+import string
 
 def main(f_str):
+
+    # Diccionario personalizado para distinguir ln y log
+    namespace = {
+        'ln': sp.log,              # ln(x) = log(x) base e
+        'log': lambda x: sp.log(x, 10),  # log(x) = log base 10
+        'sin': sp.sin,
+        'cos': sp.cos,
+        'tan': sp.tan,
+        'exp': sp.exp,
+        'sqrt': sp.sqrt,
+        'pi': sp.pi,
+        'e': sp.E,
+    }
+
+    # Parsear la función con contexto personalizado
+    f = sp.sympify(f_str, locals=namespace)
+
+    # Extraer variables de la función ya parseada
+    free_symbols_list = list(f.free_symbols)  # set a list
+    variables = []
+    for i in range(len(free_symbols_list)):
+        variables.append(str(free_symbols_list[i]))
+
+    variables = sorted(variables)
+    valores = []
+    cotas = []
+
     # Definir simbolos
-    x, y, z = sp.symbols('x y z')
-    vx = vy = vz = cx = cy = cz = 0 
-    # Convertir el string de la funcion a expresion simbolica
+    simbolos = {}
+    for i in range(len(variables)):
+        simbolos[variables[i]] = sp.Symbol(variables[i])
+
+
+    # Pedir Valores
+    for i in range(len(variables)):
+        valor = float(input(f"Valor de la variable {variables[i]}: "))
+        cota = input(f"Cota de la variable {variables[i]}: ")
+        
+
+        if cota == "":
+            if valor >=1:
+                cota = 0.5
+            else:
+                valor_str = str(valor)
+                for digito in '123456789':
+                    valor_str = valor_str.replace(digito, '0')
+                cota = float(valor_str + '5')
+
+        valores.append(valor)
+        cotas.append(float(cota))
     
-    f = sp.sympify(f_str)
-    existe_x = False
-    existe_y = False
-    existe_z = False
-    for char in f_str:
-        if existe_x == False and char == 'x':
-            vx = float(input("Valor X: "))
-            cx = float(input("Cota X: "))
 
-            existe_x = True
-        if existe_y == False and char == 'y':
-            vy = float(input("Valor Y: "))
-            cy = float(input("Cota Y: "))
+    
 
-            existe_y = True
-        if existe_z == False and char == 'z':
-            vz = float(input("Valor Z: "))
-            cz = float(input("Cota Z: "))
-
-            existe_z = True
+    subs = {simbolos[var]: val for var, val in zip(variables, valores)}
 
 
-    # Evaluar la funcion original en el punto (vx, vy, vz)
-    valor_funcion = round(f.subs({x: vx, y: vy, z: vz}),4)
-    print("Valor de la funcion:", valor_funcion.evalf())
-    valor_real= valor_funcion.evalf()
+    # Evaluar Funcion
+    valor_real = f.subs(subs).evalf()
+    print("\nValor de la función en el punto dado:", round(valor_real, 4))
+
     # Derivadas parciales
-    df_dx = sp.diff(f, x)
-    df_dy = sp.diff(f, y)
-    df_dz = sp.diff(f, z)
+    derivadas = []
+
+    for var in variables:
+        derivadas.append(sp.diff(f, simbolos[var]))
+
 
     # Evaluar derivadas en el punto
-    valor_dx = round(df_dx.subs({x: vx, y: vy, z: vz}).evalf(),4)
-    valor_dy = round(df_dy.subs({x: vx, y: vy, z: vz}).evalf(),4)
-    valor_dz = round(df_dz.subs({x: vx, y: vy, z: vz}).evalf(),4)
-
-    print("∂f/∂x:", valor_dx)
-    print("∂f/∂y:", valor_dy)
-    print("∂f/∂z:", valor_dz)
+    derivadas_punto = []
+    for var, derivada in zip(variables, derivadas):
+        df = derivada.subs(subs).evalf()
+        derivadas_punto.append(df)
+        print(f"Derivada parcial respecto a {var}: {round(df, 4)}")
 
     # Calcular cota total usando la formula del diferencial total
-    cf = round(abs(valor_dx)*cx + abs(valor_dy)*cy + abs(valor_dz)*cz,4)
-    print("Cota del error total:", cf)
 
-    pf = round(cf/valor_real,4)
-    print("Error relativo:", pf)
+    error_absoluto = 0
+    for valor, cota in zip(derivadas_punto, cotas):
+        error_absoluto += abs(valor)*abs(cota)
     
-    p_porcentual = round(pf*100,4)
-    print(f"Error relativo porcentual: {p_porcentual}%")  
+    error_relativo = error_absoluto/abs(valor_real)
+    error_porcentual = error_relativo*100
+
+    print(f"Error absoluto: {error_absoluto}")
+    print(f"Error relativo: {error_relativo}")
+    print(f"Error porcentual: {error_porcentual}%")
+
 
 if __name__ == '__main__':
-    print("________  ________  ___       ________  ___  ___  ___       ________  ________  ________  ________          ________  ___  ___  ________  ________  _______   _____ ______   ________")
-    print("|\\   ____\\|\\   __  \\|\\  \\     |\\   ____\\|\\  \\|\\  \\|\\  \\     |\\   __  \\|\\   ___ \\|\\   __  \\|\\   __  \\        |\\   ____\\|\\  \\|\\  \\|\\   __  \\|\\   __  \\|\\  ___ \\ |\\   _ \\  _   \\|\\   __  \\")
-    print("\\ \\  \\___|\\ \\  \\|\\  \\ \\  \\    \\ \\  \\___|\\ \\  \\\\\\  \\ \\  \\    \\ \\  \\|\\  \\ \\  \\_|\\ \\ \\  \\|\\  \\ \\  \\|\\  \\       \\ \\  \\___|\\ \\  \\\\\\  \\ \\  \\|\\  \\ \\  \\|\\  \\ \\   __/|\\ \\  \\\\\\__\\ \\  \\ \\  \\|\\  \\")
-    print("\\ \\  \\    \\ \\   __  \\ \\  \\    \\ \\  \\    \\ \\  \\\\\\  \\ \\  \\    \\ \\   __  \\ \\  \\ \\\\ \\ \\  \\\\\\  \\ \\   _  _\\       \\ \\_____  \\ \\  \\\\\\  \\ \\   ____\\ \\   _  _\\ \\  \\_|/_\\ \\  \\\\|__| \\  \\ \\  \\\\\\  \\")
-    print("\\ \\  \\____\\ \\  \\ \\  \\ \\  \\____\\ \\  \\____\\ \\  \\\\\\  \\ \\  \\____\\ \\  \\ \\  \\ \\  \\_\\\\ \\ \\  \\\\\\  \\ \\  \\\\  \\|       \\|____|\\  \\ \\  \\\\\\  \\ \\  \\___|\\ \\  \\\\  \\\\ \\  \\_|\\ \\ \\  \\    \\ \\  \\ \\  \\\\\\  \\")
-    print("\\ \\_______\\ \\__\\ \\__\\ \\_______\\ \\_______\\ \\_______\\ \\_______\\ \\__\\ \\__\\ \\_______\\ \\_______\\ \\__\\\\ _\\         ____\\_\\  \\ \\_______\\ \\__\\    \\ \\__\\\\ _\\\\ \\_______\\ \\__\\    \\ \\__\\ \\_______\\")
-    print("\\|_______|\\|__|\\|__|\\|_______|\\|_______|\\|_______|\\|_______|\\|__|\\|__|\\|_______|\\|_______|\\|__|\\|__|       |\\_________\\|_______|\\|__|     \\|__|\\|__|\\|_______|\\|__|     \\|__|\\|_______|")
-    print("\\|_________|")
-    print("")
-    print("")
-    print("________  ________  _______   ________  ________  ________          ________  ________  ________")
-    print("|\\   ____\\|\\   __  \\|\\  ___ \\ |\\   __  \\|\\   ___ \\|\\   __  \\        |\\   __  \\|\\   __  \\|\\   __  \\  ___")
-    print("\\ \\  \\___|\\ \\  \\|\\  \\ \\   __/|\\ \\  \\|\\  \\ \\  \\_|\\ \\ \\  \\|\\  \\       \\ \\  \\|\\  \\ \\  \\|\\  \\ \\  \\|\\  \\|\\__\\")
-    print("\\ \\  \\    \\ \\   _  _\\ \\  \\_|/_\\ \\   __  \\ \\  \\ \\\\ \\ \\  \\\\\\  \\       \\ \\   ____\\ \\  \\\\\\  \\ \\   _  _\\|__|")
-    print("\\ \\  \\____\\ \\  \\\\  \\\\ \\  \\_|\\ \\ \\  \\ \\  \\ \\  \\_\\\\ \\ \\  \\\\\\  \\       \\ \\  \\___|\\ \\  \\\\\\  \\ \\  \\\\  \\|  ___")
-    print("\\ \\_______\\ \\__\\\\ _\\\\ \\_______\\ \\__\\ \\__\\ \\_______\\ \\_______\\       \\ \\__\\    \\ \\_______\\ \\__\\\\ _\\ |\\__\\")
-    print("\\|_______|\\|__|\\|__|\\|_______|\\|__|\\|__|\\|_______|\\|_______|        \\|__|     \\|_______|\\|__|\\|__|\\|__|")
-    print("")
-    print("")
-    print("")
-    print("________ ________  ________  ________   ________  ________          ________  ________  ________  ________  _________  ________")
-    print("|\\  _____\\\\   __  \\|\\   __  \\|\\   ___  \\|\\   ____\\|\\   __  \\        |\\_____  \\|\\   __  \\|\\   __  \\|\\   __  \\|\\___   ___\\\\   __  \\")
-    print("\\ \\  \\__/\\ \\  \\|\\  \\ \\  \\|\\  \\ \\  \\\\ \\  \\ \\  \\___|\\ \\  \\|\\  \\        \\|___/  /\\ \\  \\|\\  \\ \\  \\|\\  \\ \\  \\|\\  \\|___ \\  \\_\\ \\  \\|\\  \\")
-    print("\\ \\   __\\\\ \\   _  _\\ \\   __  \\ \\  \\\\ \\  \\ \\  \\    \\ \\  \\\\\\  \\           /  / /\\ \\   __  \\ \\   ____\\ \\   __  \\   \\ \\  \\ \\ \\   __  \\")
-    print("\\ \\  \\_| \\ \\  \\\\  \\\\ \\  \\ \\  \\ \\  \\\\ \\  \\ \\  \\____\\ \\  \\\\\\  \\         /  /_/__\\ \\  \\ \\  \\ \\  \\___|\\ \\  \\ \\  \\   \\ \\  \\ \\ \\  \\ \\  \\")
-    print("\\ \\__\\   \\ \\__\\\\ _\\\\ \\__\\ \\__\\ \\__\\\\ \\__\\ \\_______\\ \\_______\\       |\\________\\ \\__\\ \\__\\ \\__\\    \\ \\__\\ \\__\\   \\ \\__\\ \\ \\__\\ \\__\\")
-    print("\\|__|    \\|__|\\|__|\\|__|\\|__|\\|__| \\|__|\\|_______|\\|_______|        \\|_______|\\|__|\\__|\\|__|     \\|__|\\|__|    \\|__|  \\|__|\\|__|")
-    print("")
-    print("")
-    print("")
-    print("_______   _____ ______   ________  ________   ___  ___  _______   ___                ___    ___ ___  ___  ________  ___  ________  ________")
-    print("|\\  ___ \\ |\\   _ \\  _   \\|\\   __  \\|\\   ___  \\|\\  \\|\\  \\|\\  ___ \\ |\\  \\              |\\  \\  /  /|\\  \\|\\  \\|\\   ___ \\|\\  \\|\\   ____\\|\\   __  \\")
-    print("\\ \\   __/|\\ \\  \\\\\\__\\ \\  \\ \\  \\|\\  \\ \\  \\\\ \\  \\ \\  \\\\\\  \\ \\   __/|\\ \\  \\             \\ \\  \\/  / | \\  \\\\\\  \\ \\  \\_|\\ \\ \\  \\ \\  \\___|\\ \\  \\|\\  \\")
-    print("\\ \\  \\_|/_\\ \\  \\\\|__| \\  \\ \\   __  \\ \\  \\\\ \\  \\ \\  \\\\\\  \\ \\  \\_|/_\\ \\  \\             \\ \\    / / \\ \\  \\\\\\  \\ \\  \\ \\\\ \\ \\  \\ \\  \\    \\ \\   __  \\")
-    print("\\ \\  \\_|\\ \\ \\  \\    \\ \\  \\ \\  \\ \\  \\ \\  \\\\ \\  \\ \\  \\\\\\  \\ \\  \\_|\\ \\ \\  \\____         \\/  /  /   \\ \\  \\\\\\  \\ \\  \\_\\\\ \\ \\  \\ \\  \\____\\ \\  \\ \\  \\")
-    print("\\ \\_______\\ \\__\\    \\ \\__\\ \\__\\ \\__\\ \\__\\\\ \\__\\ \\_______\\ \\_______\\ \\_______\\     __/  / /      \\ \\_______\\ \\_______\\ \\__\\ \\_______\\ \\__\\ \\__\\")
-    print("\\|_______|\\|__|     \\|__|\\|__|\\|__|\\|__| \\|__|\\|_______|\\|_______|\\|_______|    |\\___/ /        \\|_______|\\|_______|\\|__|\\|_______|\\|__|\\|__|")
-    print("\\|___|/")
-    print("")
-    print("")
     print("Funcion de ejemplo: 2*x**2+2*y**2+2*z**2") 
+
     print("Sintaxis de operaciones: https://chatgpt.com/share/6813974c-3fac-800e-9ca9-fb1f0d1e85b0")
-    while True:
-        try:
-            f = input("Inserte su funcion (usar x, y, z):\n> ")
-            main(f)
-            break
+    
+    f = input("Inserte su funcion (usar letras de variables):\n> ")
+    main(f)
         except :
             print("Error: La expresión ingresada no es válida.")
