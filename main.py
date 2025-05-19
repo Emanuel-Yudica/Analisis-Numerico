@@ -1,7 +1,6 @@
 import sympy as sp
 
 def main(f_str):
-
     # Diccionario personalizado para distinguir ln y log
     namespace = {
         'ln': sp.log,              # ln(x) = log(x) base e
@@ -36,9 +35,17 @@ def main(f_str):
 
     # Pedir Valores
     for i in range(len(variables)):
-        valor = float(input(f"Valor de la variable {variables[i]}: "))
-        cota = input(f"Cota de la variable {variables[i]}: ")
-        
+        try:
+            valor = float(input(f"Valor de la variable {variables[i]}: "))
+        except:
+            print("Valor de variable incorrecto.")
+            exit()
+        try:
+            cota = input(f"Cota de la variable {variables[i]}: ")
+        except:
+            print("Valor de cota incorrecto.")
+            exit()
+
 
         if cota == "":
             if valor >=1:
@@ -90,12 +97,15 @@ def main(f_str):
     print(f"Error porcentual: {error_porcentual}%")
 
 
+
 if __name__ == '__main__':
     print("Funcion de ejemplo: 2*x**2+2*y**2+2*z**2") 
 
     print("Sintaxis de operaciones: https://chatgpt.com/share/6813974c-3fac-800e-9ca9-fb1f0d1e85b0")
     
-    f = input("Inserte su funcion (usar letras de variables):\n> ")
+    try:
+        f = input("Inserte su funcion (usar letras de variables):\n> ")
+    except:
+        print("Sintaxis de funcion incorrecta.")
+        exit()
     main(f)
-        except :
-            print("Error: La expresión ingresada no es válida.")
